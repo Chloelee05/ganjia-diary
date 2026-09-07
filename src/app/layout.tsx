@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Serif_KR } from 'next/font/google';
 import Link from 'next/link';
+import SignOutButton from '@/components/SignOutButton';
 import './globals.css';
 
 const notoSerif = Noto_Serif_KR({
@@ -49,6 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <NavLink href="/list">목록</NavLink>
             <NavLink href="/gapja">60갑자</NavLink>
             <NavLink href="/analysis">분석</NavLink>
+            <div style={{ marginLeft: 'auto' }}>
+              <SignOutButton />
+            </div>
           </div>
         </header>
 
