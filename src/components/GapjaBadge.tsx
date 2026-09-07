@@ -1,39 +1,82 @@
 'use client';
 
 import type { GanjiPillar } from '@/lib/ganjia';
-
-const OHAENG_COLORS: Record<string, string> = {
-  목: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  화: 'bg-red-100 text-red-800 border-red-200',
-  토: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  금: 'bg-slate-100 text-slate-700 border-slate-300',
-  수: 'bg-blue-100 text-blue-800 border-blue-200',
-};
+import { getOhaengColor, getOhaengBg, getOhaengBorder } from '@/lib/ohaeng';
 
 interface GapjaBadgeProps {
   pillar: GanjiPillar;
   label?: string;
   size?: 'sm' | 'md' | 'lg';
   onClick?: () => void;
+  showHanja?: boolean;
 }
 
-export default function GapjaBadge({ pillar, label, size = 'md', onClick }: GapjaBadgeProps) {
-  const color = OHAENG_COLORS[pillar.ohaeng] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+export default function GapjaBadge({
+  pillar,
+  label,
+  size = 'md',
+  onClick,
+  showHanja = false,
+}: GapjaBadgeProps) {
+  const stemColor = getOhaengColor(pillar.ohaeng);
+  const branchColor = getOhaengColor(pillar.branchOhaeng);
 
-  const sizeClass = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-3 py-1',
-    lg: 'text-base px-4 py-1.5',
-  }[size];
+  // 배경은 천간 오행의 아주 연한 tint
+  const bg = getOhaengBg(pillar.ohaeng);
+  const border = getOhaengBorder(pillar.ohaeng);
+
+  const px = { sm: '8px', md: '12px', lg: '14px' }[size];
+  const py = { sm: '3px', md: '5px', lg: '7px' }[size];
+  const fontSize = { sm: '11px', md: '13px', lg: '15px' }[size];
+  const labelSize = { sm: '9px', md: '10px', lg: '11px' }[size];
+  const hanjaSize = { sm: '8px', md: '9px', lg: '10px' }[size];
 
   return (
     <span
-      className={`inline-flex flex-col items-center gap-0.5 border rounded-lg font-medium ${color} ${sizeClass} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
       onClick={onClick}
-      title={`${pillar.nameHanja} · ${pillar.ohaeng} ${pillar.eumyang}`}
+      title={`${pillar.nameHanja} · 천간 ${pillar.ohaeng} · 지지 ${pillar.branchOhaeng}`}
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '1px',
+        background: bg,
+        border: `1px solid ${border}`,
+        borderRadius: '5px',
+        padding: `${py} ${px}`,
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'opacity 0.15s',
+        userSelect: 'none',
+      }}
+      className={onClick ? 'hover:opacity-75' : ''}
     >
-      {label && <span className="text-[10px] opacity-60 font-normal leading-none">{label}</span>}
-      <span>{pillar.name}</span>
+      {label && (
+        <span style={{ fontSize: labelSize, color: '#9b9b9b', lineHeight: 1 }}>
+          {label}
+        </span>
+      )}
+
+      {/* 갑자 이름: 천간·지지 각각 색 */}
+      <span style={{ display: 'flex', alignItems: 'baseline', lineHeight: 1.1 }}>
+        <span style={{ fontSize, fontWeight: 600, color: stemColor, letterSpacing: '-0.01em' }}>
+          {pillar.stem}
+        </span>
+        <span style={{ fontSize, fontWeight: 600, color: branchColor, letterSpacing: '-0.01em' }}>
+          {pillar.branch}
+        </span>
+      </span>
+
+      {/* 한자 (옵션) */}
+      {showHanja && (
+        <span style={{ display: 'flex', alignItems: 'baseline', lineHeight: 1 }}>
+          <span style={{ fontSize: hanjaSize, color: stemColor, opacity: 0.5 }}>
+            {pillar.stemHanja}
+          </span>
+          <span style={{ fontSize: hanjaSize, color: branchColor, opacity: 0.5 }}>
+            {pillar.branchHanja}
+          </span>
+        </span>
+      )}
     </span>
   );
 }

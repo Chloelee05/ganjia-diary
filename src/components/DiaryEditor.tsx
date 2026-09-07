@@ -1,23 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSaju, today, formatDate, parseDate } from '@/lib/ganjia';
+import { formatDate, parseDate, today } from '@/lib/ganjia';
 import { saveEntry, getEntryByDate, deleteEntry } from '@/lib/diary';
 import type { DiaryEntry } from '@/lib/supabase/types';
-import SajuDisplay from './SajuDisplay';
 
-const MOODS = ['😄 좋음', '😊 보통', '😐 그냥저냥', '😔 나쁨', '😩 최악'];
-const ENERGY_LABELS = ['', '1 – 방전', '2 – 피곤', '3 – 보통', '4 – 활기', '5 – 최상'];
+const MOODS = [
+  { label: '좋음', emoji: '😊' },
+  { label: '보통', emoji: '😐' },
+  { label: '나쁨', emoji: '😔' },
+  { label: '최악', emoji: '😩' },
+];
 
 interface DiaryEditorProps {
   initialDate?: Date;
   onSaved?: (entry: DiaryEntry) => void;
+  onDateChange?: (date: Date) => void;
 }
 
-export default function DiaryEditor({ initialDate, onSaved }: DiaryEditorProps) {
+export default function DiaryEditor({ initialDate, onSaved, onDateChange }: DiaryEditorProps) {
   const [date, setDate] = useState<Date>(initialDate ?? today());
-  const [saju, setSaju] = useState(() => getSaju(initialDate ?? today()));
-
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mood, setMood] = useState('');
@@ -25,13 +27,15 @@ export default function DiaryEditor({ initialDate, onSaved }: DiaryEditorProps) 
   const [tags, setTags] = useState('');
   const [existing, setExisting] = useState<DiaryEntry | null>(null);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
 
-  // 날짜 바뀔 때마다 갑자 재계산 + 기존 일기 로드
   useEffect(() => {
-    setSaju(getSaju(date));
-    setSaved(false);
+    const d = initialDate ?? today();
+    setDate(d);
+  }, [initialDate]);
 
+  useEffect(() => {
+    setJustSaved(false);
     getEntryByDate(formatDate(date)).then((entry) => {
       if (entry) {
         setExisting(entry);
@@ -52,7 +56,9 @@ export default function DiaryEditor({ initialDate, onSaved }: DiaryEditorProps) 
   }, [date]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(parseDate(e.target.value));
+    const d = parseDate(e.target.value);
+    setDate(d);
+    onDateChange?.(d);
   };
 
   const handleSave = async () => {
@@ -64,14 +70,12 @@ export default function DiaryEditor({ initialDate, onSaved }: DiaryEditorProps) 
         content: content.trim(),
         mood: mood || undefined,
         energy_level: energy,
-        tags: tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
+        tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
       });
       setExisting(entry);
-      setSaved(true);
+      setJustSaved(true);
       onSaved?.(entry);
+      setTimeout(() => setJustSaved(false), 2000);
     } finally {
       setSaving(false);
     }
@@ -86,108 +90,202 @@ export default function DiaryEditor({ initialDate, onSaved }: DiaryEditorProps) 
     setMood('');
     setEnergy(3);
     setTags('');
-    setSaved(false);
+  };
+
+  // Ctrl+S / Cmd+S 저장
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '1px solid var(--border)',
+    borderRadius: 0,
+    padding: '6px 0',
+    fontSize: '14px',
+    color: 'var(--text-ink)',
+    outline: 'none',
   };
 
   return (
     <div className="space-y-5">
-      {/* 날짜 + 갑자 */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      {/* 날짜 선택 — subtle */}
+      <div className="flex items-center gap-2">
         <input
           type="date"
           value={formatDate(date)}
           onChange={handleDateChange}
-          className="border border-stone-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-stone-300"
+          style={{
+            ...inputStyle,
+            width: 'auto',
+            fontSize: '13px',
+            color: 'var(--text-faint)',
+            borderBottom: 'none',
+          }}
         />
-        <SajuDisplay saju={saju} />
         {existing && (
-          <span className="text-xs text-stone-400 ml-auto">기존 일기 수정 중</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-faint)' }}>
+            · 저장된 일기 있음
+          </span>
         )}
       </div>
 
       {/* 제목 */}
       <input
         type="text"
-        placeholder="제목 (선택)"
+        placeholder="제목"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="w-full border border-stone-200 rounded-lg px-4 py-2.5 text-sm bg-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300"
+        style={{
+          ...inputStyle,
+          fontSize: '18px',
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
+        }}
       />
 
       {/* 본문 */}
       <textarea
-        placeholder={`${formatDate(date)} 일기를 써보세요...`}
+        placeholder="오늘 어떤 일이 있었나요..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        rows={10}
-        className="w-full border border-stone-200 rounded-lg px-4 py-3 text-sm bg-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300 resize-none leading-relaxed"
+        rows={12}
+        style={{
+          width: '100%',
+          background: 'transparent',
+          border: 'none',
+          borderTop: '1px solid var(--border)',
+          borderBottom: '1px solid var(--border)',
+          borderRadius: 0,
+          padding: '16px 0',
+          fontSize: '14px',
+          lineHeight: '1.9',
+          color: 'var(--text-ink)',
+          outline: 'none',
+          resize: 'none',
+        }}
       />
 
-      {/* 기분 · 에너지 */}
-      <div className="flex flex-wrap gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-stone-500 font-medium">기분</label>
-          <div className="flex flex-wrap gap-1.5">
-            {MOODS.map((m) => (
-              <button
-                key={m}
-                onClick={() => setMood(mood === m ? '' : m)}
-                className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                  mood === m
-                    ? 'bg-stone-800 text-white border-stone-800'
-                    : 'border-stone-200 text-stone-600 hover:border-stone-400'
-                }`}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
+      {/* 메타 — 기분·에너지·태그 */}
+      <div
+        className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-1"
+        style={{ fontSize: '12px', color: 'var(--text-faint)' }}
+      >
+        {/* 기분 */}
+        <div className="flex items-center gap-1.5">
+          <span>기분</span>
+          {MOODS.map((m) => (
+            <button
+              key={m.label}
+              onClick={() => setMood(mood === m.label ? '' : m.label)}
+              title={m.label}
+              style={{
+                fontSize: '16px',
+                opacity: mood === '' || mood === m.label ? 1 : 0.25,
+                transition: 'opacity 0.1s',
+                background: 'none',
+                border: 'none',
+                padding: '2px',
+                lineHeight: 1,
+              }}
+            >
+              {m.emoji}
+            </button>
+          ))}
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-stone-500 font-medium">
-            에너지 – {ENERGY_LABELS[energy]}
-          </label>
+        {/* 에너지 */}
+        <div className="flex items-center gap-2">
+          <span>에너지</span>
+          <div className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                onClick={() => setEnergy(n)}
+                style={{
+                  width: '16px',
+                  height: '6px',
+                  borderRadius: '2px',
+                  background: n <= energy ? 'var(--text-ink)' : 'var(--border)',
+                  border: 'none',
+                  transition: 'background 0.1s',
+                }}
+              />
+            ))}
+          </div>
+          <span style={{ color: 'var(--text-faint)' }}>
+            {['', '방전', '피곤', '보통', '활기', '최상'][energy]}
+          </span>
+        </div>
+
+        {/* 태그 */}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <span className="shrink-0">#</span>
           <input
-            type="range"
-            min={1}
-            max={5}
-            value={energy}
-            onChange={(e) => setEnergy(Number(e.target.value))}
-            className="w-32 accent-stone-700"
+            type="text"
+            placeholder="태그 (쉼표 구분)"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              fontSize: '12px',
+              color: 'var(--text-mid)',
+              outline: 'none',
+              width: '100%',
+            }}
           />
         </div>
       </div>
 
-      {/* 태그 */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs text-stone-500 font-medium">태그 (쉼표로 구분)</label>
-        <input
-          type="text"
-          placeholder="예: 여행, 만남, 일, 건강"
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          className="w-full border border-stone-200 rounded-lg px-4 py-2 text-sm bg-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-300"
-        />
-      </div>
-
-      {/* 버튼 */}
-      <div className="flex gap-2 justify-end">
-        {existing && (
+      {/* 액션 버튼 */}
+      <div className="flex items-center justify-between pt-1">
+        <span style={{ fontSize: '11px', color: 'var(--text-faint)' }}>
+          {justSaved ? '✓ 저장됨' : '⌘S로 저장'}
+        </span>
+        <div className="flex gap-2">
+          {existing && (
+            <button
+              onClick={handleDelete}
+              style={{
+                fontSize: '12px',
+                color: '#b84030',
+                background: 'none',
+                border: 'none',
+                padding: '6px 10px',
+                opacity: 0.7,
+              }}
+              className="hover:opacity-100 transition-opacity"
+            >
+              삭제
+            </button>
+          )}
           <button
-            onClick={handleDelete}
-            className="px-4 py-2 text-sm text-red-500 hover:text-red-700 transition-colors"
+            onClick={handleSave}
+            disabled={!content.trim() || saving}
+            style={{
+              fontSize: '13px',
+              background: content.trim() ? 'var(--text-ink)' : 'var(--border)',
+              color: content.trim() ? '#fff' : 'var(--text-faint)',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '7px 18px',
+              transition: 'background 0.15s',
+              fontFamily: 'inherit',
+            }}
           >
-            삭제
+            {saving ? '저장 중' : '저장'}
           </button>
-        )}
-        <button
-          onClick={handleSave}
-          disabled={!content.trim() || saving}
-          className="px-6 py-2 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          {saving ? '저장 중...' : saved ? '✓ 저장됨' : '저장'}
-        </button>
+        </div>
       </div>
     </div>
   );

@@ -1,32 +1,71 @@
 @import "tailwindcss";
 
+/* ── 오행 색상 변수 ─────────────────────────── */
 :root {
-  --font-serif: 'Noto Serif KR', Georgia, serif;
+  --color-mok: #3a6b4a;
+  --color-hwa: #b84030;
+  --color-to:  #8a6c20;
+  --color-geum:#5a5a5a;
+  --color-su:  #2c5282;
+
+  --bg-paper: #f9f8f5;
+  --text-ink:  #1a1a1a;
+  --text-mid:  #5a5a5a;
+  --text-faint:#9b9b9b;
+  --border:    #e2ddd6;
 }
+
+/* ── 베이스 ──────────────────────────────────── */
+html { font-size: 15px; }
 
 body {
-  font-family: var(--font-serif);
+  background: var(--bg-paper);
+  color: var(--text-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 커스텀 스크롤바 */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ── 타이포그래피 ─────────────────────────────── */
+h1, h2, h3 { letter-spacing: -0.02em; }
+
+/* textarea 스크롤바 */
+textarea {
+  resize: none;
 }
 
-::-webkit-scrollbar-track {
-  background: #f5f5f4;
-}
+/* ── 스크롤바 ─────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d0ccc5; border-radius: 3px; }
 
-::-webkit-scrollbar-thumb {
-  background: #d6d3d1;
-  border-radius: 3px;
-}
-
-/* line-clamp 유틸리티 */
+/* ── 유틸 ─────────────────────────────────────── */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── 입력 공통 ────────────────────────────────── */
+input[type="date"],
+input[type="text"],
+textarea {
+  outline: none;
+}
+
+input[type="date"]:focus,
+input[type="text"]:focus,
+textarea:focus {
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.08);
+}
+
+/* ── 버튼 공통 ────────────────────────────────── */
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }

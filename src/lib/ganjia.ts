@@ -45,6 +45,7 @@ export interface GanjiPillar {
   name: string;         // 갑자, 을축, ...
   nameHanja: string;
   ohaeng: string;       // 천간 오행
+  branchOhaeng: string; // 지지 오행
   eumyang: string;      // 양 / 음
 }
 
@@ -62,6 +63,7 @@ export const GAPJA_60: GanjiPillar[] = Array.from({ length: 60 }, (_, i) => {
     name: `${CHEONGAN[stemIndex]}${JIJI[branchIndex]}`,
     nameHanja: `${CHEONGAN_HANJA[stemIndex]}${JIJI_HANJA[branchIndex]}`,
     ohaeng: CHEONGAN_OHAENG[stemIndex],
+    branchOhaeng: JIJI_OHAENG[branchIndex],
     eumyang: CHEONGAN_EUMYANG[stemIndex] ? '양' : '음',
   };
 });

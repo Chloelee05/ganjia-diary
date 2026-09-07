@@ -7,7 +7,7 @@ import { getDayGapjaStats, getEntriesByDayGapja } from '@/lib/diary';
 import type { DiaryEntry } from '@/lib/supabase/types';
 import GapjaGrid from '@/components/GapjaGrid';
 import EntryList from '@/components/EntryList';
-import GapjaBadge from '@/components/GapjaBadge';
+import { getOhaengColor } from '@/lib/ohaeng';
 
 export default function GapjaPage() {
   const todayPillar = getDayPillar(today());
@@ -28,47 +28,75 @@ export default function GapjaPage() {
     });
   }, [selected]);
 
+  const stemColor = getOhaengColor(selected.ohaeng);
+  const branchColor = getOhaengColor(selected.branchOhaeng);
+  const entryCount = stats[selected.index] ?? 0;
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-stone-800 mb-1">60갑자 보기</h1>
-        <p className="text-sm text-stone-500">
-          같은 일주가 돌아오는 날의 일기를 모아 패턴을 발견하세요. (60일 주기)
+    <div className="space-y-10">
+
+      {/* 페이지 타이틀 */}
+      <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
+        <h1 className="text-xl font-bold" style={{ letterSpacing: '-0.02em' }}>
+          60갑자
+        </h1>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--text-faint)' }}>
+          일주를 선택하면 같은 일진에 기록된 일기를 모아볼 수 있어요. (60일 주기)
         </p>
       </div>
 
       {/* 그리드 */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm">
-        <GapjaGrid
-          selectedIdx={selected.index}
-          highlightIdx={todayPillar.index}
-          entryCountByIdx={stats}
-          onSelect={setSelected}
-        />
-        <p className="text-xs text-stone-400 mt-3">
-          오렌지 링 = 오늘 일주 · 숫자 = 해당 일주 일기 수
-        </p>
+      <GapjaGrid
+        selectedIdx={selected.index}
+        highlightIdx={todayPillar.index}
+        entryCountByIdx={stats}
+        onSelect={setSelected}
+      />
+
+      {/* 범례 */}
+      <div className="flex flex-wrap gap-4 text-xs" style={{ color: 'var(--text-faint)' }}>
+        <span>
+          <span
+            className="inline-block w-2 h-2 rounded-sm mr-1"
+            style={{ background: '#f5e9c8', border: '1px solid #c4933f', verticalAlign: 'middle' }}
+          />
+          오늘 일주
+        </span>
+        <span>
+          <span
+            className="inline-block w-2 h-2 rounded-sm mr-1"
+            style={{ background: '#2a2a2a', verticalAlign: 'middle' }}
+          />
+          선택됨
+        </span>
+        <span>우측 하단 숫자 = 일기 수</span>
       </div>
 
       {/* 선택된 갑자 상세 */}
       <div>
-        <div className="flex items-center gap-3 mb-4">
-          <GapjaBadge pillar={selected} size="lg" />
-          <div>
-            <p className="text-sm font-semibold text-stone-700">
-              {selected.nameHanja} ({selected.name})
-            </p>
-            <p className="text-xs text-stone-500">
-              {selected.ohaeng} {selected.eumyang} · 60갑자 #{selected.index + 1}
-            </p>
-          </div>
-          <span className="ml-auto text-sm text-stone-500">
-            {stats[selected.index] ?? 0}개의 일기
+        <div
+          style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '16px' }}
+          className="flex items-baseline gap-3"
+        >
+          <span style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1, letterSpacing: '-0.02em' }}>
+            <span style={{ color: stemColor }}>{selected.stem}</span>
+            <span style={{ color: branchColor }}>{selected.branch}</span>
+          </span>
+          <span style={{ fontSize: '14px', color: 'var(--text-faint)' }}>
+            {selected.nameHanja}
+          </span>
+          <span style={{ fontSize: '12px', color: 'var(--text-faint)' }}>
+            천간 {selected.ohaeng} · 지지 {selected.branchOhaeng} · #{selected.index + 1}/60
+          </span>
+          <span style={{ marginLeft: 'auto', fontSize: '13px', color: 'var(--text-faint)' }}>
+            {entryCount}개의 일기
           </span>
         </div>
 
         {loading ? (
-          <p className="text-sm text-stone-400 py-4 text-center">불러오는 중...</p>
+          <p className="py-8 text-sm text-center" style={{ color: 'var(--text-faint)' }}>
+            불러오는 중...
+          </p>
         ) : (
           <EntryList entries={entries} />
         )}

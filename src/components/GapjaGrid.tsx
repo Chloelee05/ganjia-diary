@@ -2,28 +2,13 @@
 
 import { GAPJA_60 } from '@/lib/ganjia';
 import type { GanjiPillar } from '@/lib/ganjia';
-
-const OHAENG_COLORS: Record<string, string> = {
-  목: 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100',
-  화: 'bg-red-50 border-red-200 hover:bg-red-100',
-  토: 'bg-amber-50 border-amber-200 hover:bg-amber-100',
-  금: 'bg-slate-50 border-slate-200 hover:bg-slate-100',
-  수: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
-};
-
-const OHAENG_TEXT: Record<string, string> = {
-  목: 'text-emerald-800',
-  화: 'text-red-800',
-  토: 'text-amber-900',
-  금: 'text-slate-700',
-  수: 'text-blue-800',
-};
+import { getOhaengColor } from '@/lib/ohaeng';
 
 interface GapjaGridProps {
   selectedIdx?: number;
   entryCountByIdx?: Record<number, number>;
   onSelect?: (pillar: GanjiPillar) => void;
-  highlightIdx?: number; // 오늘 일주
+  highlightIdx?: number;
 }
 
 export default function GapjaGrid({
@@ -33,28 +18,95 @@ export default function GapjaGrid({
   highlightIdx,
 }: GapjaGridProps) {
   return (
-    <div className="grid grid-cols-6 sm:grid-cols-10 gap-1.5">
+    <div
+      className="grid gap-px"
+      style={{
+        gridTemplateColumns: 'repeat(10, 1fr)',
+        background: '#e8e4de', // grid line color
+        border: '1px solid #e8e4de',
+        borderRadius: '6px',
+        overflow: 'hidden',
+      }}
+    >
       {GAPJA_60.map((pillar) => {
         const count = entryCountByIdx[pillar.index] ?? 0;
         const isSelected = selectedIdx === pillar.index;
         const isToday = highlightIdx === pillar.index;
-        const color = OHAENG_COLORS[pillar.ohaeng] ?? 'bg-gray-50 border-gray-200 hover:bg-gray-100';
-        const textColor = OHAENG_TEXT[pillar.ohaeng] ?? 'text-gray-700';
+
+        const stemColor = getOhaengColor(pillar.ohaeng);
+        const branchColor = getOhaengColor(pillar.branchOhaeng);
 
         return (
           <button
             key={pillar.index}
             onClick={() => onSelect?.(pillar)}
-            className={`relative flex flex-col items-center py-2 px-1 border rounded-lg text-xs transition-all ${color} ${textColor} ${
-              isSelected ? 'ring-2 ring-stone-600 ring-offset-1' : ''
-            } ${isToday ? 'ring-2 ring-amber-500 ring-offset-1' : ''}`}
-            title={`${pillar.nameHanja} · ${pillar.ohaeng} ${pillar.eumyang}${count ? ` · ${count}개` : ''}`}
+            title={`${pillar.name} (${pillar.nameHanja}) · 천간 ${pillar.ohaeng} · 지지 ${pillar.branchOhaeng}${count ? ` · 일기 ${count}개` : ''}`}
+            style={{
+              background: isSelected
+                ? '#2a2a2a'
+                : isToday
+                ? '#fdf8ed'
+                : '#faf9f6',
+            }}
+            className="relative flex flex-col items-center justify-center py-2.5 px-1 transition-colors hover:brightness-95 group"
           >
-            <span className="font-semibold">{pillar.name}</span>
-            <span className="text-[10px] opacity-60">{pillar.nameHanja}</span>
+            {/* 오늘 표시 — 상단 줄 */}
+            {isToday && (
+              <span
+                className="absolute top-0 left-0 right-0 h-[2px]"
+                style={{ background: '#c4933f' }}
+              />
+            )}
+
+            {/* 갑자 이름: 천간·지지 각각 색 */}
+            <span className="flex items-baseline leading-none mb-1">
+              <span
+                className="text-[13px] font-semibold tracking-tight"
+                style={{ color: isSelected ? 'rgba(255,255,255,0.9)' : stemColor }}
+              >
+                {pillar.stem}
+              </span>
+              <span
+                className="text-[13px] font-semibold tracking-tight"
+                style={{ color: isSelected ? 'rgba(255,255,255,0.7)' : branchColor }}
+              >
+                {pillar.branch}
+              </span>
+            </span>
+
+            {/* 한자: 같은 색 계열 흐리게 */}
+            <span className="flex items-baseline leading-none">
+              <span
+                className="text-[9px]"
+                style={{
+                  color: isSelected
+                    ? 'rgba(255,255,255,0.4)'
+                    : stemColor,
+                  opacity: isSelected ? 1 : 0.45,
+                }}
+              >
+                {pillar.stemHanja}
+              </span>
+              <span
+                className="text-[9px]"
+                style={{
+                  color: isSelected
+                    ? 'rgba(255,255,255,0.4)'
+                    : branchColor,
+                  opacity: isSelected ? 1 : 0.45,
+                }}
+              >
+                {pillar.branchHanja}
+              </span>
+            </span>
+
+            {/* 일기 개수 도트 */}
             {count > 0 && (
-              <span className="absolute top-1 right-1 text-[9px] bg-stone-700 text-white rounded-full w-4 h-4 flex items-center justify-center leading-none">
-                {count > 99 ? '99+' : count}
+              <span
+                className="absolute bottom-1 right-1.5 text-[8px] font-medium tabular-nums"
+                style={{ color: isSelected ? 'rgba(255,255,255,0.5)' : '#aaa' }}
+              >
+                {count}
               </span>
             )}
           </button>
