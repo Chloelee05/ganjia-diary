@@ -615,7 +615,7 @@ function SipsungPillarCell({
       {stemSS && branchSS ? (
         <span style={{ fontSize: '9px', fontWeight: 600, lineHeight: 1.4, textAlign: 'center' }}>
           <span style={{ color: SIPSUNG_CATEGORY_COLOR[stemSS.category] }}>
-            {label === '일' ? '일간' : stemSS.name}
+            {stemSS.name}
           </span>
           <span style={{ color: 'var(--border)', margin: '0 1px' }}>/</span>
           <span style={{ color: SIPSUNG_CATEGORY_COLOR[branchSS.category], opacity: 0.8 }}>
