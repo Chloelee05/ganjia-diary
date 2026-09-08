@@ -16,6 +16,7 @@ import { getAllEntries, getEntriesByDayGapja } from '@/lib/diary';
 import type { DiaryEntry } from '@/lib/supabase/types';
 import DiaryEditor from '@/components/DiaryEditor';
 import { streakDays, avgEnergy, avgMoodScore, MOOD_EMOJI } from '@/lib/analysis';
+import { loadUserSaju, getSipsungForStem, getMainSipsungForBranch, SIPSUNG_CATEGORY_COLOR } from '@/lib/sipsung';
 
 export default function DashboardPage() {
   const todayDate = today();
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   const [allEntries, setAllEntries] = useState<DiaryEntry[]>([]);
   const [samePillarEntries, setSamePillarEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userSaju, setUserSaju] = useState(() => loadUserSaju());
 
   // URL 날짜 파라미터 지원
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function DashboardPage() {
       <div className="space-y-0">
 
         {/* 날짜 헤더 */}
-        <DayHeader date={date} saju={saju} isToday={isToday} onDateChange={setDate} />
+        <DayHeader date={date} saju={saju} isToday={isToday} onDateChange={setDate} userSaju={userSaju} />
 
         {/* 에디터 */}
         <div style={{ paddingTop: '28px' }}>
@@ -174,10 +176,12 @@ function DayHeader({
   saju,
   isToday,
   onDateChange,
+  userSaju,
 }: {
   date: Date;
   saju: ReturnType<typeof getSaju>;
   isToday: boolean;
+  userSaju: ReturnType<typeof loadUserSaju>;
   onDateChange: (d: Date) => void;
 }) {
   const weekday = date.toLocaleDateString('ko-KR', { weekday: 'short' });
@@ -231,19 +235,7 @@ function DayHeader({
             { label: '월', pillar: saju.month },
             { label: '일', pillar: saju.day, large: true },
           ] as { label: string; pillar: GanjiPillar; large?: boolean }[]).map(({ label, pillar, large }) => (
-            <div key={label} className="flex flex-col items-center gap-0.5">
-              <span style={{ fontSize: '9px', color: 'var(--text-faint)' }}>{label}</span>
-              <span style={{ lineHeight: 1, fontWeight: 700, fontSize: large ? '32px' : '16px', letterSpacing: '-0.02em' }}>
-                <span style={{ color: getOhaengColor(pillar.ohaeng) }}>{pillar.stem}</span>
-                <span style={{ color: getOhaengColor(pillar.branchOhaeng) }}>{pillar.branch}</span>
-              </span>
-              <span style={{ fontSize: '9px', color: 'var(--text-faint)', letterSpacing: '0.02em' }}>
-                {pillar.nameHanja}
-              </span>
-              <span style={{ fontSize: '9px', color: 'var(--text-faint)', opacity: 0.7 }}>
-                {pillar.ohaeng}/{pillar.branchOhaeng}
-              </span>
-            </div>
+            <SipsungPillarCell key={label} label={label} pillar={pillar} large={large} userSaju={userSaju} />
           ))}
         </div>
       </div>
@@ -596,6 +588,46 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     >
       {children}
     </p>
+  );
+}
+
+function SipsungPillarCell({
+  label, pillar, large, userSaju,
+}: {
+  label: string;
+  pillar: GanjiPillar;
+  large?: boolean;
+  userSaju: ReturnType<typeof loadUserSaju>;
+}) {
+  const stemSS = userSaju ? getSipsungForStem(userSaju.ilganIdx, pillar.stemIndex) : null;
+  const branchSS = userSaju ? getMainSipsungForBranch(userSaju.ilganIdx, pillar.branchIndex) : null;
+
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <span style={{ fontSize: '9px', color: 'var(--text-faint)' }}>{label}</span>
+      <span style={{ lineHeight: 1, fontWeight: 700, fontSize: large ? '32px' : '16px', letterSpacing: '-0.02em' }}>
+        <span style={{ color: getOhaengColor(pillar.ohaeng) }}>{pillar.stem}</span>
+        <span style={{ color: getOhaengColor(pillar.branchOhaeng) }}>{pillar.branch}</span>
+      </span>
+      <span style={{ fontSize: '9px', color: 'var(--text-faint)', letterSpacing: '0.02em' }}>
+        {pillar.nameHanja}
+      </span>
+      {stemSS && branchSS ? (
+        <span style={{ fontSize: '9px', fontWeight: 600, lineHeight: 1.4, textAlign: 'center' }}>
+          <span style={{ color: SIPSUNG_CATEGORY_COLOR[stemSS.category] }}>
+            {label === '일' ? '일간' : stemSS.name}
+          </span>
+          <span style={{ color: 'var(--border)', margin: '0 1px' }}>/</span>
+          <span style={{ color: SIPSUNG_CATEGORY_COLOR[branchSS.category], opacity: 0.8 }}>
+            {branchSS.name}
+          </span>
+        </span>
+      ) : (
+        <span style={{ fontSize: '9px', color: 'var(--text-faint)', opacity: 0.7 }}>
+          {pillar.ohaeng}/{pillar.branchOhaeng}
+        </span>
+      )}
+    </div>
   );
 }
 

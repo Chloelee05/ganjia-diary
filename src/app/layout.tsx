@@ -50,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <NavLink href="/list">목록</NavLink>
             <NavLink href="/gapja">60갑자</NavLink>
             <NavLink href="/analysis">분석</NavLink>
+            <NavLink href="/settings">내 사주</NavLink>
             <div style={{ marginLeft: 'auto' }}>
               <SignOutButton />
             </div>
