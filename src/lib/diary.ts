@@ -183,6 +183,7 @@ export async function saveEntry(
     id: generateId(),
     created_at: now,
     updated_at: now,
+    user_id: 'local',
     ...meta,
     ...commonFields,
   };
