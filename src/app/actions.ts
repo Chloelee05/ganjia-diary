@@ -98,7 +98,7 @@ export async function getDayGapjaStats(): Promise<Record<number, number>> {
 // ─────────────────────────────────────────────
 
 export async function saveEntry(
-  date: Date,
+  dateStr: string,   // "YYYY-MM-DD" 문자열로 받아야 타임존 손실이 없음
   fields: {
     title?: string;
     content: string;
@@ -108,6 +108,9 @@ export async function saveEntry(
   }
 ): Promise<DiaryEntry> {
   const sb = await getServerSupabase();
+  // 문자열 → 로컬 Date로 변환 후 갑자 계산
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
   const meta = buildEntryMeta(date);
   const now = new Date().toISOString();
   const commonFields = {

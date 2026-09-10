@@ -65,7 +65,7 @@ export default function DiaryEditor({ initialDate, onSaved, onDateChange }: Diar
     if (!content.trim()) return;
     setSaving(true);
     try {
-      const entry = await saveEntry(date, {
+      const entry = await saveEntry(formatDate(date), {
         title: title.trim() || undefined,
         content: content.trim(),
         mood: mood || undefined,
