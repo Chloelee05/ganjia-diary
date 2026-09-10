@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAllEntries } from '@/lib/diary';
+import { getAllEntries } from '@/app/actions';
 import type { DiaryEntry } from '@/lib/supabase/types';
 import EntryList from '@/components/EntryList';
 

@@ -12,7 +12,7 @@ import {
 } from '@/lib/ganjia';
 import type { GanjiPillar } from '@/lib/ganjia';
 import { getOhaengColor, getOhaengBg } from '@/lib/ohaeng';
-import { getAllEntries, getEntriesByDayGapja } from '@/lib/diary';
+import { getAllEntries, getEntriesByDayGapja } from '@/app/actions';
 import type { DiaryEntry } from '@/lib/supabase/types';
 import DiaryEditor from '@/components/DiaryEditor';
 import { streakDays, avgEnergy, avgMoodScore, MOOD_EMOJI } from '@/lib/analysis';

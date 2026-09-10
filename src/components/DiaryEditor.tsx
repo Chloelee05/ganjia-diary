@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { formatDate, parseDate, today } from '@/lib/ganjia';
-import { saveEntry, getEntryByDate, deleteEntry } from '@/lib/diary';
+import { saveEntry, getEntryByDate, deleteEntry } from '@/app/actions';
 import type { DiaryEntry } from '@/lib/supabase/types';
 
 const MOODS = [

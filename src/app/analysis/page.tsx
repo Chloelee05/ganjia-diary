@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { GAPJA_60 } from '@/lib/ganjia';
-import { getAllEntries } from '@/lib/diary';
+import { getAllEntries } from '@/app/actions';
 import type { DiaryEntry } from '@/lib/supabase/types';
 import { getOhaengColor, getOhaengBg } from '@/lib/ohaeng';
 import {

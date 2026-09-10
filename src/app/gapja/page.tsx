@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { GAPJA_60, getDayPillar, today } from '@/lib/ganjia';
 import type { GanjiPillar } from '@/lib/ganjia';
-import { getDayGapjaStats, getEntriesByDayGapja } from '@/lib/diary';
+import { getDayGapjaStats, getEntriesByDayGapja } from '@/app/actions';
 import type { DiaryEntry } from '@/lib/supabase/types';
 import GapjaGrid from '@/components/GapjaGrid';
 import EntryList from '@/components/EntryList';
