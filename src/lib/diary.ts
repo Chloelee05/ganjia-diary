@@ -84,10 +84,14 @@ export function buildEntryMeta(date: Date): Pick<
 export async function getAllEntries(): Promise<DiaryEntry[]> {
   if (isSupabaseConfigured()) {
     const sb = await getSupabase();
-    const { data } = await sb
+    const { data: { user } } = await sb.auth.getUser();
+    console.log('[diary] current user:', user?.id, user?.email);
+    const { data, error } = await sb
       .from('diary_entries')
       .select('*')
       .order('date', { ascending: false });
+    if (error) console.error('[diary] getAllEntries error:', error);
+    console.log('[diary] entries fetched:', data?.length ?? 0);
     return (data as DiaryEntry[]) ?? [];
   }
   return loadLocal().sort((a, b) => b.date.localeCompare(a.date));
