@@ -22,8 +22,8 @@ export default function GapjaGrid({
       className="grid gap-px"
       style={{
         gridTemplateColumns: 'repeat(10, 1fr)',
-        background: '#e8e4de', // grid line color
-        border: '1px solid #e8e4de',
+        background: 'var(--bg-grid)',
+        border: '1px solid var(--bg-grid)',
         borderRadius: '6px',
         overflow: 'hidden',
       }}
@@ -43,10 +43,10 @@ export default function GapjaGrid({
             title={`${pillar.name} (${pillar.nameHanja}) · 천간 ${pillar.ohaeng} · 지지 ${pillar.branchOhaeng}${count ? ` · 일기 ${count}개` : ''}`}
             style={{
               background: isSelected
-                ? '#2a2a2a'
+                ? 'var(--text-ink)'
                 : isToday
-                ? '#fdf8ed'
-                : '#faf9f6',
+                ? 'var(--bg-today-hl)'
+                : 'var(--bg-cell)',
             }}
             className="relative flex flex-col items-center justify-center py-2.5 px-1 transition-colors hover:brightness-95 group"
           >

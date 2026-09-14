@@ -101,7 +101,7 @@ export default function EntryList({ entries, onSelect }: EntryListProps) {
                       fontSize: '10px',
                       padding: '2px 7px',
                       borderRadius: '20px',
-                      background: '#f0ede8',
+                      background: 'var(--bg-has-entry)',
                       color: 'var(--text-faint)',
                     }}
                   >

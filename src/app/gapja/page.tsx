@@ -65,7 +65,7 @@ export default function GapjaPage() {
         <span>
           <span
             className="inline-block w-2 h-2 rounded-sm mr-1"
-            style={{ background: '#2a2a2a', verticalAlign: 'middle' }}
+            style={{ background: 'var(--text-ink)', verticalAlign: 'middle' }}
           />
           선택됨
         </span>

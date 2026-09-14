@@ -265,7 +265,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ padding: '16px', background: '#f5f3ef', borderRadius: '6px' }}>
+    <div style={{ padding: '16px', background: 'var(--bg-card)', borderRadius: '6px' }}>
       <p style={{ fontSize: '11px', color: 'var(--text-faint)', marginBottom: '6px' }}>{label}</p>
       <p style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1 }}>{value}</p>
       {sub && <p style={{ fontSize: '10px', color: 'var(--text-faint)', marginTop: '4px' }}>{sub}</p>}

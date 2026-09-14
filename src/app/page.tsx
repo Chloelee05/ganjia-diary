@@ -260,7 +260,7 @@ function TodayStatus({
   avgM: number | null;
 }) {
   return (
-    <div style={{ background: '#f5f3ef', borderRadius: '8px', padding: '16px' }}>
+    <div style={{ background: 'var(--bg-card)', borderRadius: '8px', padding: '16px' }}>
       <div className="flex items-center justify-between mb-3">
         <span style={{ fontSize: '11px', color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           오늘
@@ -437,10 +437,10 @@ function MiniCycleStrip({
                 aspectRatio: '1',
                 borderRadius: '3px',
                 background: isToday
-                  ? '#2a2a2a'
+                  ? 'var(--text-ink)'
                   : hasEntry
-                  ? '#f0ede8'
-                  : '#f5f3ef',
+                  ? 'var(--bg-has-entry)'
+                  : 'var(--bg-paper)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

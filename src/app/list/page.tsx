@@ -25,12 +25,12 @@ export default function ListPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-stone-800">전체 일기 목록</h1>
-        <p className="text-sm text-stone-500 mt-1">{entries.length}개의 일기</p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-ink)' }}>전체 일기 목록</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-mid)' }}>{entries.length}개의 일기</p>
       </div>
 
       {loading ? (
-        <p className="text-sm text-stone-400 py-8 text-center">불러오는 중...</p>
+        <p className="text-sm py-8 text-center" style={{ color: 'var(--text-faint)' }}>불러오는 중...</p>
       ) : (
         <EntryList entries={entries} onSelect={handleSelect} />
       )}
