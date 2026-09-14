@@ -20,9 +20,12 @@
   --bg-card:      #f5f3ef;
   --bg-grid:      #e8e4de;
   --bg-cell:      #faf9f6;
-  --bg-has-entry: #f0ede8;
-  --bg-today-hl:  #fdf8ed;
-  --nav-bg:       rgba(249,248,245,0.92);
+  --bg-has-entry:    #f0ede8;
+  --bg-today-hl:     #fdf8ed;
+  --bg-selected:     #2a2a2a;
+  --text-on-selected: rgba(255,255,255,0.9);
+  --text-on-selected-sub: rgba(255,255,255,0.5);
+  --nav-bg:          rgba(249,248,245,0.92);
 }
 
 /* ── 다크모드 변수 ────────────────────────────── */
@@ -35,9 +38,12 @@ html.dark {
   --bg-card:      #252420;
   --bg-grid:      #1a1917;
   --bg-cell:      #201f1c;
-  --bg-has-entry: #272422;
-  --bg-today-hl:  #2a2518;
-  --nav-bg:       rgba(28,27,24,0.92);
+  --bg-has-entry:    #272422;
+  --bg-today-hl:     #2a2518;
+  --bg-selected:     #e0dbd2;
+  --text-on-selected: rgba(20,18,14,0.9);
+  --text-on-selected-sub: rgba(20,18,14,0.45);
+  --nav-bg:          rgba(28,27,24,0.92);
 }
 
 /* ── 다크모드 스크롤바 ───────────────────────── */

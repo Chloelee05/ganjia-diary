@@ -43,7 +43,7 @@ export default function GapjaGrid({
             title={`${pillar.name} (${pillar.nameHanja}) · 천간 ${pillar.ohaeng} · 지지 ${pillar.branchOhaeng}${count ? ` · 일기 ${count}개` : ''}`}
             style={{
               background: isSelected
-                ? 'var(--text-ink)'
+                ? 'var(--bg-selected)'
                 : isToday
                 ? 'var(--bg-today-hl)'
                 : 'var(--bg-cell)',
@@ -62,13 +62,13 @@ export default function GapjaGrid({
             <span className="flex items-baseline leading-none mb-1">
               <span
                 className="text-[13px] font-semibold tracking-tight"
-                style={{ color: isSelected ? 'rgba(255,255,255,0.9)' : stemColor }}
+                style={{ color: isSelected ? 'var(--text-on-selected)' : stemColor }}
               >
                 {pillar.stem}
               </span>
               <span
                 className="text-[13px] font-semibold tracking-tight"
-                style={{ color: isSelected ? 'rgba(255,255,255,0.7)' : branchColor }}
+                style={{ color: isSelected ? 'var(--text-on-selected)' : branchColor }}
               >
                 {pillar.branch}
               </span>
@@ -80,7 +80,7 @@ export default function GapjaGrid({
                 className="text-[9px]"
                 style={{
                   color: isSelected
-                    ? 'rgba(255,255,255,0.4)'
+                    ? 'var(--text-on-selected-sub)'
                     : stemColor,
                   opacity: isSelected ? 1 : 0.45,
                 }}
@@ -91,7 +91,7 @@ export default function GapjaGrid({
                 className="text-[9px]"
                 style={{
                   color: isSelected
-                    ? 'rgba(255,255,255,0.4)'
+                    ? 'var(--text-on-selected-sub)'
                     : branchColor,
                   opacity: isSelected ? 1 : 0.45,
                 }}
@@ -104,7 +104,7 @@ export default function GapjaGrid({
             {count > 0 && (
               <span
                 className="absolute bottom-1 right-1.5 text-[8px] font-medium tabular-nums"
-                style={{ color: isSelected ? 'rgba(255,255,255,0.5)' : '#aaa' }}
+                style={{ color: isSelected ? 'var(--text-on-selected-sub)' : 'var(--text-faint)' }}
               >
                 {count}
               </span>
