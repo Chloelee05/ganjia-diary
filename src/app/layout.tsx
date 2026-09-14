@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Noto_Serif_KR } from 'next/font/google';
 import Link from 'next/link';
 import SignOutButton from '@/components/SignOutButton';
+import ThemeProvider from '@/components/ThemeProvider';
+import ThemeToggle from '@/components/ThemeToggle';
 import './globals.css';
 
 const notoSerif = Noto_Serif_KR({
@@ -22,42 +24,45 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className="min-h-screen font-serif"
         style={{ background: 'var(--bg-paper)', color: 'var(--text-ink)' }}
       >
-        {/* ── 상단 네비 ── */}
-        <header
-          className="sticky top-0 z-10"
-          style={{
-            background: 'rgba(249,248,245,0.92)',
-            backdropFilter: 'blur(8px)',
-            borderBottom: '1px solid var(--border)',
-          }}
-        >
-          <div className="max-w-5xl mx-auto px-5 h-12 flex items-center gap-1">
-            {/* 로고 */}
-            <Link
-              href="/"
-              className="mr-5 flex items-baseline gap-1.5 select-none"
-              style={{ textDecoration: 'none' }}
-            >
-              <span
-                className="text-base font-bold tracking-widest"
-                style={{ color: 'var(--text-ink)', letterSpacing: '0.12em' }}
+        <ThemeProvider>
+          {/* ── 상단 네비 ── */}
+          <header
+            className="sticky top-0 z-10"
+            style={{
+              background: 'var(--nav-bg)',
+              backdropFilter: 'blur(8px)',
+              borderBottom: '1px solid var(--border)',
+            }}
+          >
+            <div className="max-w-5xl mx-auto px-5 h-12 flex items-center gap-1">
+              {/* 로고 */}
+              <Link
+                href="/"
+                className="mr-5 flex items-baseline gap-1.5 select-none"
+                style={{ textDecoration: 'none' }}
               >
-                六十甲子
-              </span>
-            </Link>
+                <span
+                  className="text-base font-bold tracking-widest"
+                  style={{ color: 'var(--text-ink)', letterSpacing: '0.12em' }}
+                >
+                  六十甲子
+                </span>
+              </Link>
 
-            <NavLink href="/">일기</NavLink>
-            <NavLink href="/list">목록</NavLink>
-            <NavLink href="/gapja">60갑자</NavLink>
-            <NavLink href="/analysis">분석</NavLink>
-            <NavLink href="/settings">내 사주</NavLink>
-            <div style={{ marginLeft: 'auto' }}>
-              <SignOutButton />
+              <NavLink href="/">일기</NavLink>
+              <NavLink href="/list">목록</NavLink>
+              <NavLink href="/gapja">60갑자</NavLink>
+              <NavLink href="/analysis">분석</NavLink>
+              <NavLink href="/settings">내 사주</NavLink>
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <ThemeToggle />
+                <SignOutButton />
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        <main className="max-w-5xl mx-auto px-5 py-10">{children}</main>
+          <main className="max-w-5xl mx-auto px-5 py-10">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );

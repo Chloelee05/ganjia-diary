@@ -147,7 +147,7 @@ export default function SettingsPage() {
               <div
                 key={key}
                 style={{
-                  background: '#f5f3ef',
+                  background: 'var(--bg-card)',
                   borderRadius: '8px',
                   padding: '16px 12px',
                   textAlign: 'center',
@@ -197,10 +197,10 @@ export default function SettingsPage() {
             display: 'grid',
             gridTemplateColumns: 'repeat(10, 1fr)',
             gap: '2px',
-            background: '#e8e4de',
+            background: 'var(--bg-grid)',
             borderRadius: '6px',
             overflow: 'hidden',
-            border: '1px solid #e8e4de',
+            border: '1px solid var(--bg-grid)',
           }}
         >
           {GAPJA_60.map((pillar) => {
@@ -213,7 +213,7 @@ export default function SettingsPage() {
               <div
                 key={pillar.index}
                 title={`${pillar.name} · 천간:${stemSS.name} · 지지:${branchSS.name}`}
-                style={{ background: '#faf9f6', padding: '6px 2px', textAlign: 'center' }}
+                style={{ background: 'var(--bg-cell)', padding: '6px 2px', textAlign: 'center' }}
               >
                 {/* 갑자 */}
                 <div style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1.2 }}>
