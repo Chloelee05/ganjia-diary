@@ -19,15 +19,21 @@ import {
   type OhaengStats,
   type PillarStat,
 } from '@/lib/analysis';
+import { analyzeWithGemini } from '@/app/gemini-analysis';
 
 // ─── 탭 정의 ──────────────────────────────────
-const TABS = ['개요', '에너지·기분', '오행 분석', '일주 분석', '태그'] as const;
+const TABS = ['개요', '에너지·기분', '오행 분석', '일주 분석', '태그', 'AI 해석'] as const;
 type Tab = (typeof TABS)[number];
 
 export default function AnalysisPage() {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('개요');
+
+  // AI 해석 상태
+  const [aiResult, setAiResult] = useState<string>('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string>('');
 
   useEffect(() => {
     getAllEntries().then((data) => {
@@ -42,6 +48,20 @@ export default function AnalysisPage() {
   const series = useMemo(() => timeSeries(entries, 90), [entries]);
   const insights = useMemo(() => generateInsights(entries, ohaeng, tags), [entries, ohaeng, tags]);
   const streak = streakDays(entries);
+
+  const handleAiAnalyze = async () => {
+    setAiLoading(true);
+    setAiError('');
+    setAiResult('');
+    try {
+      const result = await analyzeWithGemini(entries);
+      setAiResult(result);
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : '분석 중 오류가 발생했어요.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   if (loading) return <Spinner />;
   if (entries.length === 0) return <Empty />;
@@ -238,6 +258,80 @@ export default function AnalysisPage() {
                 <TagCloud tags={tags} />
               </Section>
             </>
+          )}
+        </div>
+      )}
+
+      {/* ── AI 해석 탭 ── */}
+      {tab === 'AI 해석' && (
+        <div className="space-y-6">
+          <div style={{ fontSize: '13px', color: 'var(--text-faint)', lineHeight: 1.7 }}>
+            전체 일기(최근 50개)를 Gemini AI가 분석해요.
+            오행 패턴, 에너지·기분 경향, 태그 습관 등을 한국어로 해석합니다.
+          </div>
+
+          {!aiResult && !aiLoading && (
+            <button
+              onClick={handleAiAnalyze}
+              style={{
+                padding: '10px 24px',
+                background: 'var(--text-ink)',
+                color: 'var(--bg-paper)',
+                border: 'none',
+                borderRadius: '5px',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+                cursor: 'pointer',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              ✦ AI 분석 시작
+            </button>
+          )}
+
+          {aiLoading && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-faint)', fontSize: '13px' }}>
+              <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>◌</span>
+              Gemini가 분석 중이에요... (10~20초 소요)
+            </div>
+          )}
+
+          {aiError && (
+            <div
+              style={{
+                padding: '14px 16px',
+                background: 'var(--bg-card)',
+                borderRadius: '6px',
+                border: '1px solid var(--border)',
+                fontSize: '13px',
+                color: '#b84030',
+                lineHeight: 1.6,
+              }}
+            >
+              <strong>오류:</strong> {aiError}
+            </div>
+          )}
+
+          {aiResult && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <AiMarkdown text={aiResult} />
+              <button
+                onClick={handleAiAnalyze}
+                style={{
+                  alignSelf: 'flex-start',
+                  padding: '6px 16px',
+                  background: 'none',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  color: 'var(--text-faint)',
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                }}
+              >
+                다시 분석
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -821,4 +915,75 @@ function GapjaHeatmap({ entries, mode }: { entries: DiaryEntry[]; mode: 'count' 
       </div>
     </div>
   );
+}
+
+// ─── AI 마크다운 렌더러 (간단) ─────────────────
+function AiMarkdown({ text }: { text: string }) {
+  // 굵게(**text**), 헤더(# ## ###), 목록(- * 숫자.) 간단 파싱
+  const lines = text.split('\n');
+
+  return (
+    <div
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: '8px',
+        padding: '24px',
+        fontSize: '13px',
+        lineHeight: 1.85,
+        color: 'var(--text-mid)',
+      }}
+    >
+      {lines.map((line, i) => {
+        // 빈 줄
+        if (!line.trim()) return <div key={i} style={{ height: '8px' }} />;
+
+        // 헤더
+        const h3 = line.match(/^###\s+(.*)/);
+        const h2 = line.match(/^##\s+(.*)/);
+        const h1 = line.match(/^#\s+(.*)/);
+        if (h1 || h2) {
+          return (
+            <p key={i} style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-ink)', margin: '16px 0 6px', letterSpacing: '-0.02em' }}>
+              {renderInline((h1 ?? h2)![1])}
+            </p>
+          );
+        }
+        if (h3) {
+          return (
+            <p key={i} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-ink)', margin: '12px 0 4px' }}>
+              {renderInline(h3[1])}
+            </p>
+          );
+        }
+
+        // 목록
+        const bullet = line.match(/^[-*]\s+(.*)/);
+        const numbered = line.match(/^\d+\.\s+(.*)/);
+        if (bullet || numbered) {
+          return (
+            <div key={i} style={{ display: 'flex', gap: '8px', margin: '3px 0', paddingLeft: '4px' }}>
+              <span style={{ color: 'var(--text-faint)', minWidth: '12px', flexShrink: 0 }}>
+                {numbered ? `${line.match(/^(\d+)\./)?.[1]}.` : '·'}
+              </span>
+              <span>{renderInline((bullet ?? numbered)![1])}</span>
+            </div>
+          );
+        }
+
+        // 일반 텍스트
+        return <p key={i} style={{ margin: '3px 0' }}>{renderInline(line)}</p>;
+      })}
+    </div>
+  );
+}
+
+function renderInline(text: string): React.ReactNode {
+  // **bold** 처리
+  const parts = text.split(/(\*\*[^*]+\*\*)/);
+  return parts.map((p, i) => {
+    const bold = p.match(/^\*\*(.+)\*\*$/);
+    if (bold) return <strong key={i} style={{ color: 'var(--text-ink)', fontWeight: 600 }}>{bold[1]}</strong>;
+    return p;
+  });
 }

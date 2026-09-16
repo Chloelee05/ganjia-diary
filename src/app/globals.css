@@ -49,6 +49,9 @@ html.dark {
 /* ── 다크모드 스크롤바 ───────────────────────── */
 html.dark ::-webkit-scrollbar-thumb { background: #3a3830; }
 
+/* ── AI 로딩 스핀 ────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ── 베이스 ──────────────────────────────────── */
 html { font-size: 15px; }
 
