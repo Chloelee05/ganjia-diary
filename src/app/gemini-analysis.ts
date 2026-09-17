@@ -63,9 +63,19 @@ function summarizeOhaeng(entries: DiaryEntry[]): string {
     .join(' / ');
 }
 
+// ─── 응답 타입 ─────────────────────────────────
+export type GeminiResult =
+  | { ok: true; text: string }
+  | { ok: false; error: string };
+
 // ─── 메인 분석 함수 ─────────────────────────────
-export async function analyzeWithGemini(entries: DiaryEntry[]): Promise<string> {
-  const client = getClient();
+export async function analyzeWithGemini(entries: DiaryEntry[]): Promise<GeminiResult> {
+  let client;
+  try {
+    client = getClient();
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'API 키 오류' };
+  }
 
   const entrySummary = summarizeEntries(entries);
   const ohaengSummary = summarizeOhaeng(entries);
@@ -89,10 +99,20 @@ ${entrySummary}
 
 분석은 솔직하고 구체적으로, 마크다운 형식(굵게, 목록)으로 작성해 주세요. 데이터가 부족한 부분은 솔직히 언급하세요.`;
 
-  const response = await client.models.generateContent({
-    model: 'gemini-2.0-flash-lite',
-    contents: prompt,
-  });
-
-  return response.text ?? '분석 결과를 받지 못했어요.';
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-3.5-flash-lite',
+      contents: prompt,
+    });
+    return { ok: true, text: response.text ?? '분석 결과를 받지 못했어요.' };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    // JSON 에러 메시지 파싱
+    try {
+      const parsed = JSON.parse(msg);
+      return { ok: false, error: parsed?.error?.message ?? msg };
+    } catch {
+      return { ok: false, error: msg };
+    }
+  }
 }

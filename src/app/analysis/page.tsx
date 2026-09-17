@@ -53,14 +53,13 @@ export default function AnalysisPage() {
     setAiLoading(true);
     setAiError('');
     setAiResult('');
-    try {
-      const result = await analyzeWithGemini(entries);
-      setAiResult(result);
-    } catch (e) {
-      setAiError(e instanceof Error ? e.message : '분석 중 오류가 발생했어요.');
-    } finally {
-      setAiLoading(false);
+    const result = await analyzeWithGemini(entries);
+    if (result.ok) {
+      setAiResult(result.text);
+    } else {
+      setAiError(result.error);
     }
+    setAiLoading(false);
   };
 
   if (loading) return <Spinner />;
