@@ -25,8 +25,10 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // 세션 새로고침 (토큰 만료 자동 갱신)
-  const { data: { user } } = await supabase.auth.getUser();
+  // 쿠키에 있는 세션만 읽는다. getUser()는 매 요청마다 Supabase로
+  // 네트워크 호출을 해서, 응답이 늦으면 Vercel 미들웨어가 504로 끊긴다.
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   const isLoginPage = request.nextUrl.pathname.startsWith('/login');
   const isAuthCallback = request.nextUrl.pathname.startsWith('/auth/callback');
